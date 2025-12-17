@@ -1,4 +1,5 @@
 ﻿using ExpenseControl.Api.Middlewares;
+using ExpenseControl.Infrastructure.Persistence;
 using Microsoft.OpenApi;
 using System.Reflection;
 using System.Text.Json.Serialization;
@@ -13,7 +14,8 @@ public static class DependencyInjection
 			.AddControllersWithConfiguration()
 			.AddSwaggerConfiguration()
 			.AddErrorHandling()
-			.AddCorsConfiguration();
+			.AddCorsConfiguration()
+			.AddHealthCheckConfiguration();
 	}
 
 	private static IServiceCollection AddControllersWithConfiguration(this IServiceCollection services)
@@ -70,6 +72,14 @@ public static class DependencyInjection
 								.AllowAnyMethod()
 								.AllowAnyHeader());
 		});
+
+		return services;
+	}
+
+	private static IServiceCollection AddHealthCheckConfiguration(this IServiceCollection services)
+	{
+		services.AddHealthChecks()
+				.AddDbContextCheck<ExpenseControlDbContext>();
 
 		return services;
 	}
