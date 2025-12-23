@@ -1,11 +1,12 @@
-﻿using ExpenseControl.Domain.Exceptions;
+﻿using ExpenseControl.Application.Exceptions;
+using ExpenseControl.Domain.Exceptions;
 using FluentValidation;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ExpenseControl.Api.Middlewares;
 
-public sealed class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger) : IExceptionHandler
+public sealed class GlobalExceptionMiddleware(ILogger<GlobalExceptionMiddleware> logger) : IExceptionHandler
 {
 	public async ValueTask<bool> TryHandleAsync(
 		HttpContext httpContext,
@@ -33,6 +34,20 @@ public sealed class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logge
 			{
 				Status = StatusCodes.Status404NotFound,
 				Title = "Recurso não encontrado",
+				Detail = ex.Message
+			},
+
+			AlreadyExistsException ex => new ProblemDetails
+			{
+				Status = StatusCodes.Status409Conflict,
+				Title = "Conflito de dados",
+				Detail = ex.Message
+			},
+
+			BusinessRuleException ex => new ProblemDetails
+			{
+				Status = StatusCodes.Status409Conflict,
+				Title = "Conflito de operação",
 				Detail = ex.Message
 			},
 
