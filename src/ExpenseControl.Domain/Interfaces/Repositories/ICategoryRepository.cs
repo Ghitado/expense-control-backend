@@ -7,5 +7,7 @@ public interface ICategoryRepository
 {
 	Task AddAsync(Category category);
 	Task<Category?> GetByIdAsync(Guid id);
-	Task<PaginatedResult<Category>> GetAllAsync(int page, int pageSize);
+	Task<PaginatedResult<Category>> GetPaginatedAsync(int page, int pageSize);
+	Task<bool> HasTransactionsAsync(Guid categoryId);
+	void Delete(Category category);
 }

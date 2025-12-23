@@ -1,23 +1,32 @@
 ﻿using ExpenseControl.Domain.Enums;
+using ExpenseControl.Domain.Errors;
 using ExpenseControl.Domain.Exceptions;
-using ExpenseControl.Domain.Constants;
 
 namespace ExpenseControl.Domain.Entities;
 
-public sealed class Category
+public sealed class Category : EntityBase
 {
-	public Guid Id { get; private set; }
-	public string Description { get; private set; } = string.Empty;
+	public string Name { get; private set; } = string.Empty;
 	public CategoryPurpose Purpose { get; private set; }
 
 	private Category() { } 
 
-	public Category(string description, CategoryPurpose purpose)
+	public Category(string name, CategoryPurpose purpose)
 	{
-		Validate(description);
+		Validate(name);
 
-		Id = Guid.CreateVersion7(); 
-		Description = description;
+		Name = name;
+		Purpose = purpose;
+	}
+
+	public void UpdateName(string name)
+	{
+		Validate(name); 
+		Name = name;
+	}
+
+	public void UpdatePurpose(CategoryPurpose purpose)
+	{
 		Purpose = purpose;
 	}
 
@@ -27,9 +36,9 @@ public sealed class Category
 		return (int)Purpose == (int)type;
 	}
 
-	private static void Validate(string description)
+	private static void Validate(string name)
 	{
-		if (string.IsNullOrWhiteSpace(description))
+		if (string.IsNullOrWhiteSpace(name))
 			throw new DomainException(DomainErrors.Category.DescriptionRequired);
 	}
 }

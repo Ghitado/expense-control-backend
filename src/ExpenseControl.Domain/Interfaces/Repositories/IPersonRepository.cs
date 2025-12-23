@@ -7,6 +7,8 @@ public interface IPersonRepository
 {
 	Task AddAsync(Person person);
 	Task<Person?> GetByIdAsync(Guid id);
-	Task<PaginatedResult<Person>> GetAllAsync(int page, int pageSize);
+	Task<PaginatedResult<Person>> GetPaginatedAsync(int page, int pageSize);
+	Task<bool> HasRevenueTransactionsAsync(Guid personId); 
+	void Update(Person person);
 	void Delete(Person person);
 }
