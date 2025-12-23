@@ -6,7 +6,7 @@ using Microsoft.Extensions.Logging;
 
 namespace ExpenseControl.Application.UseCases.Category.CreateCategory;
 
-public class CreateCategoryUseCase(
+public sealed class CreateCategoryUseCase(
 	ICategoryRepository repository,
 	IUnitOfWork unitOfWork,
 	IValidator<CreateCategoryRequest> validator,
@@ -17,17 +17,17 @@ public class CreateCategoryUseCase(
 	{
 		await validator.ValidateAndThrowAsync(request);
 
-		var category = new Domain.Entities.Category(request.Description, request.Purpose);
+		var category = new Domain.Entities.Category(request.Name, request.Purpose);
 
 		await repository.AddAsync(category);
 		await unitOfWork.CommitAsync();
 
 		logger.LogInformation(
-			"Categoria criada com sucesso. ID: {CategoryId} | Descrição: {Description}",
+			"Categoria criada com sucesso. ID: {CategoryId} | Nome: {Name}",
 			category.Id,
-			category.Description);
+			category.Name);
 
-		return new CategoryResponse(category.Id, category.Description, category.Purpose);
+		return new CategoryResponse(category.Id, category.Name, category.Purpose);
 	}
 }
 

@@ -3,6 +3,7 @@
 public sealed record PersonResponse(
 	Guid Id,
 	string Name,
+	DateTime BirthDate,
 	int Age
 );
 

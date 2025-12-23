@@ -1,4 +1,6 @@
 ﻿using ExpenseControl.Application.Dtos.Transaction;
+using ExpenseControl.Application.Errors;
+using ExpenseControl.Application.Exceptions;
 using ExpenseControl.Domain.Exceptions;
 using ExpenseControl.Domain.Interfaces;
 using ExpenseControl.Domain.Interfaces.Repositories;
@@ -7,7 +9,7 @@ using Microsoft.Extensions.Logging;
 
 namespace ExpenseControl.Application.UseCases.Transaction.CreateTransaction;
 
-public class CreateTransactionUseCase(
+public sealed class CreateTransactionUseCase(
 	ITransactionRepository transactionRepository,
 	IPersonRepository personRepository,
 	ICategoryRepository categoryRepository,
@@ -22,15 +24,16 @@ public class CreateTransactionUseCase(
 
 		var category = await categoryRepository.GetByIdAsync(request.CategoryId);
 		if (category is null)
-			throw new ResourceNotFoundException("Categoria não encontrada.");
+			throw new ResourceNotFoundException(ApplicationErrors.Category.NotFound);
 
 		var person = await personRepository.GetByIdAsync(request.PersonId);
 		if (person is null)
-			throw new ResourceNotFoundException("Pessoa não encontrada.");
+			throw new ResourceNotFoundException(ApplicationErrors.Person.NotFound);
 
 		var transaction = new Domain.Entities.Transaction(
 			request.Description,
 			request.Amount,
+			request.Date,
 			request.Type,
 			category,
 			person.Id
@@ -52,9 +55,9 @@ public class CreateTransactionUseCase(
 			transaction.Description,
 			transaction.Amount,
 			transaction.Type,
-			category.Description, 
+			category.Name, 
 			person.Name,
-			transaction.CreatedAt
+			transaction.Date
 		);
 	}
 }

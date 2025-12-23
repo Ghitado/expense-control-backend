@@ -9,6 +9,6 @@ public sealed record TransactionResponse(
 	TransactionType Type,
 	string CategoryName, 
 	string PersonName,
-	DateTime CreatedAt 
+	DateTime Date 
 );
 

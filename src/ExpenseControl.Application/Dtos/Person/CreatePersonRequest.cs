@@ -2,6 +2,6 @@
 
 public sealed record CreatePersonRequest(
 	string Name,
-	int Age
+	DateTime BirthDate 
 );
 

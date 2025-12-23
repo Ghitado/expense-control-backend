@@ -1,9 +1,9 @@
 ﻿using ExpenseControl.Application.Dtos.Category;
 using ExpenseControl.Domain.Models;
 
-namespace ExpenseControl.Application.UseCases.Category.GetAllCategories;
+namespace ExpenseControl.Application.UseCases.Category.GetCategoriesPaginated;
 
-public interface IGetAllCategoriesUseCase
+public interface IGetCategoriesPaginatedUseCase
 {
 	Task<PaginatedResult<CategoryResponse>> ExecuteAsync(int page, int size);
 }

@@ -1,12 +1,12 @@
-﻿using ExpenseControl.Domain.Exceptions;
+﻿using ExpenseControl.Application.Errors;
+using ExpenseControl.Domain.Exceptions;
 using ExpenseControl.Domain.Interfaces;
 using ExpenseControl.Domain.Interfaces.Repositories;
-using FluentValidation;
 using Microsoft.Extensions.Logging;
 
 namespace ExpenseControl.Application.UseCases.Person.DeletePerson;
 
-public class DeletePersonUseCase(
+public sealed class DeletePersonUseCase(
 	IPersonRepository repository,
 	IUnitOfWork unitOfWork,
 	ILogger<DeletePersonUseCase> logger
@@ -17,7 +17,7 @@ public class DeletePersonUseCase(
 		var person = await repository.GetByIdAsync(id);
 
 		if (person is null)
-			throw new ResourceNotFoundException("Pessoa não encontrada.");
+			throw new ResourceNotFoundException(ApplicationErrors.Person.NotFound);
 
 		repository.Delete(person);
 

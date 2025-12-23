@@ -4,7 +4,7 @@ namespace ExpenseControl.Application.Dtos.Category;
 
 public sealed record CategoryResponse(
 	Guid Id,
-	string Description,
+	string Name,
 	CategoryPurpose Purpose
 );
 

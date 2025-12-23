@@ -6,18 +6,18 @@ using Microsoft.Extensions.Logging;
 
 namespace ExpenseControl.Application.UseCases.Person.CreatePerson;
 
-public class CreatePersonUseCase(
+public sealed class CreatePersonUseCase(
 	IPersonRepository repository,
 	IUnitOfWork unitOfWork,
 	IValidator<CreatePersonRequest> validator,
-	ILogger<CreatePersonUseCase> logger) 
+	ILogger<CreatePersonUseCase> logger)
 	: ICreatePersonUseCase
 {
 	public async Task<PersonResponse> ExecuteAsync(CreatePersonRequest request)
 	{
 		await validator.ValidateAndThrowAsync(request);
 
-		var person = new Domain.Entities.Person(request.Name, request.Age);
+		var person = new Domain.Entities.Person(request.Name, request.BirthDate);
 
 		await repository.AddAsync(person);
 		await unitOfWork.CommitAsync();
@@ -27,7 +27,8 @@ public class CreatePersonUseCase(
 			person.Id,
 			person.Name);
 
-		return new PersonResponse(person.Id, person.Name, person.Age);
+		return new PersonResponse(person.Id, person.Name, person.BirthDate, person.Age);
 	}
 }
+
 

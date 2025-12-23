@@ -3,7 +3,7 @@ using FluentValidation;
 
 namespace ExpenseControl.Application.UseCases.Transaction.CreateTransaction;
 
-public class CreateTransactionValidator : AbstractValidator<CreateTransactionRequest>
+public sealed class CreateTransactionValidator : AbstractValidator<CreateTransactionRequest>
 {
 	public CreateTransactionValidator()
 	{
@@ -12,6 +12,9 @@ public class CreateTransactionValidator : AbstractValidator<CreateTransactionReq
 
 		RuleFor(x => x.Amount)
 			.GreaterThan(0).WithMessage("O valor deve ser positivo.");
+
+		RuleFor(x => x.Date)
+			.NotEmpty().WithMessage("A data da transação é obrigatória.");
 
 		RuleFor(x => x.Type)
 			.IsInEnum().WithMessage("Tipo de transação inválido.");
