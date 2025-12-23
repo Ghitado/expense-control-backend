@@ -6,10 +6,10 @@ public static class PersonFactory
 {
 	public static Domain.Entities.Person Create()
 	{
-		return new Faker<Domain.Entities.Person>("pt_BR") 
+		return new Faker<Domain.Entities.Person>("pt_BR")
 			.CustomInstantiator(f => new Domain.Entities.Person(
 				f.Name.FullName(),
-				f.Random.Int(18, 90) 
+				f.Date.Past(72, DateTime.UtcNow.AddYears(-18)) 
 			))
 			.Generate();
 	}
@@ -19,9 +19,8 @@ public static class PersonFactory
 		return new Faker<Domain.Entities.Person>("pt_BR")
 			.CustomInstantiator(f => new Domain.Entities.Person(
 				f.Name.FullName(),
-				f.Random.Int(1, 17) 
+				f.Date.Past(17, DateTime.UtcNow)
 			))
 			.Generate();
 	}
 }
-

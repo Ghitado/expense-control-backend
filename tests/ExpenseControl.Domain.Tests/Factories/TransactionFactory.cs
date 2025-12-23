@@ -10,8 +10,9 @@ public static class TransactionFactory
 	{
 		return new Faker<Transaction>("pt_BR")
 			.CustomInstantiator(f => new Transaction(
-				f.Commerce.ProductName(), 
-				f.Finance.Amount(10, 5000), 
+				f.Commerce.ProductName(),
+				decimal.Parse(f.Commerce.Price(10, 5000)), 
+				f.Date.Recent(90), 
 				type,
 				category,
 				personId ?? Guid.CreateVersion7()
@@ -19,4 +20,3 @@ public static class TransactionFactory
 			.Generate();
 	}
 }
-
