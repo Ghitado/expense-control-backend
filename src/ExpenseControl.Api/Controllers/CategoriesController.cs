@@ -1,53 +1,62 @@
 ﻿using ExpenseControl.Application.Dtos.Category;
+using ExpenseControl.Application.Dtos.Person;
 using ExpenseControl.Application.UseCases.Category.CreateCategory;
-using ExpenseControl.Application.UseCases.Category.GetAllCategories;
-using ExpenseControl.Application.UseCases.Category.GetCategoriesBalance;
+using ExpenseControl.Application.UseCases.Category.DeleteCategoryById;
+using ExpenseControl.Application.UseCases.Category.GetCategoriesPaginated;
+using ExpenseControl.Application.UseCases.Category.UpdateCategory;
 using ExpenseControl.Domain.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace ExpenseControl.Api.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("api/[controller]")]
+[Produces("application/json")] 
 public sealed class CategoriesController : ControllerBase
 {
 	/// <summary>
-	/// Creates a new category.
+	/// Cria uma nova categoria.
 	/// </summary>
-	/// <param name="useCase">Use case to execute the creation logic.</param>
-	/// <param name="request">Data to create the category.</param>
-	/// <returns>The created category.</returns>
+	/// <param name="useCase">O caso de uso responsável pela lógica de criação.</param>
+	/// <param name="request">Os dados da categoria (Descrição e Finalidade).</param>
+	/// <returns>A categoria criada.</returns>
+	/// <response code="201">Retorna a categoria criada.</response>
+	/// <response code="400">Se a validação falhar (ex: descrição vazia).</response>
+	/// <response code="500">Se ocorrer um erro interno inesperado.</response>
 	[HttpPost]
 	[Consumes("application/json")]
 	[ProducesResponseType(typeof(CategoryResponse), StatusCodes.Status201Created)]
-	[ProducesResponseType(StatusCodes.Status400BadRequest)]
+	[ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+	[ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
 	[SwaggerOperation(
-		Summary = "Create category",
-		Description = "Creates a new financial category (Revenue, Expense, or Both).")]
+		Summary = "Criar categoria",
+		Description = "Cria uma nova categoria financeira (Receita, Despesa ou Ambas).")]
 	public async Task<IActionResult> Create(
 		[FromServices] ICreateCategoryUseCase useCase,
 		[FromBody] CreateCategoryRequest request)
 	{
 		var response = await useCase.ExecuteAsync(request);
-		return StatusCode(StatusCodes.Status201Created, response);
+		return Created(string.Empty, response);
 	}
 
 	/// <summary>
-	/// Retrieves a paginated list of categories.
+	/// Obtém uma lista paginada de categorias.
 	/// </summary>
-	/// <param name="useCase">Use case to fetch categories.</param>
-	/// <param name="page">Page number (starts at 1).</param>
-	/// <param name="size">Number of items per page.</param>
-	/// <returns>A paginated result containing the categories.</returns>
+	/// <param name="useCase">O caso de uso responsável pela paginação.</param>
+	/// <param name="page">Número da página (padrão é 1).</param>
+	/// <param name="size">Quantidade de itens por página (padrão é 10).</param>
+	/// <returns>Um resultado paginado contendo as categorias.</returns>
+	/// <response code="200">Retorna a lista de categorias.</response>
 	[HttpGet]
-	// ATENÇÃO: O tipo de retorno mudou de IEnumerable para PaginatedResult
 	[ProducesResponseType(typeof(PaginatedResult<CategoryResponse>), StatusCodes.Status200OK)]
 	[SwaggerOperation(
-		Summary = "Get all categories (Paginated)",
-		Description = "Returns a paginated list of registered categories with metadata.")]
-	public async Task<IActionResult> GetAll(
-		[FromServices] IGetAllCategoriesUseCase useCase,
+		Summary = "Obter categorias (Paginado)",
+		Description = "Retorna uma lista paginada de categorias cadastradas ordenadas por nome.")]
+	public async Task<IActionResult> GetPaginated(
+		[FromServices] IGetCategoriesPaginatedUseCase useCase,
 		[FromQuery] int page = 1,
 		[FromQuery] int size = 10)
 	{
@@ -56,19 +65,60 @@ public sealed class CategoriesController : ControllerBase
 	}
 
 	/// <summary>
-	/// Retrieves the financial balance report for all categories.
+	/// Atualiza parcialmente uma categoria.
 	/// </summary>
-	/// <param name="useCase">Use case to calculate the balance.</param>
-	/// <returns>A detailed report containing individual and grand totals.</returns>
-	[HttpGet("balance")]
-	[ProducesResponseType(typeof(CategoryBalanceResponse), StatusCodes.Status200OK)]
+	/// <remarks>
+	/// Permite alterar o Nome ou a Finalidade da categoria.
+	/// <br/>
+	/// <b>Regra de Negócio:</b> Não é permitido alterar a Finalidade (Receita/Despesa) se a categoria já possuir transações vinculadas.
+	/// </remarks>
+	/// <param name="useCase">O caso de uso de atualização.</param>
+	/// <param name="id">O UUID da categoria a ser atualizada.</param>
+	/// <param name="request">Os novos dados (Nome e/ou Finalidade).</param>
+	/// <returns>Sem conteúdo se for bem-sucedido.</returns>
+	/// <response code="204">Atualização realizada com sucesso.</response>
+	/// <response code="400">Dados inválidos (ex: nome vazio).</response>
+	/// <response code="404">Categoria não encontrada.</response>
+	/// <response code="409">Conflito de Regra de Negócio (ex: tentar mudar finalidade de categoria em uso).</response>
+	[HttpPatch("{id:guid}")]
+	[Consumes("application/json")]
+	[ProducesResponseType(StatusCodes.Status204NoContent)]
+	[ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+	[ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+	[ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
 	[SwaggerOperation(
-		Summary = "Get financial balance",
-		Description = "Returns the total revenue, expense, and balance for each category, along with the grand total.")]
-	public async Task<IActionResult> GetBalance(
-	[FromServices] IGetCategoriesBalanceUseCase useCase)
+		Summary = "Atualizar categoria (Parcial)",
+		Description = "Atualiza nome ou finalidade. Bloqueia mudança de finalidade se houver histórico financeiro.")]
+	public async Task<IActionResult> Update(
+		[FromServices] IUpdateCategoryUseCase useCase,
+		[FromRoute] Guid id,
+		[FromBody] UpdateCategoryRequest request)
 	{
-		var response = await useCase.ExecuteAsync();
-		return Ok(response);
+		await useCase.ExecuteAsync(id, request);
+		return NoContent();
+	}
+
+	/// <summary>
+	/// Exclui uma categoria pelo ID.
+	/// </summary>
+	/// <param name="useCase">O caso de uso responsável pela exclusão.</param>
+	/// <param name="id">O UUID da categoria a ser excluída.</param>
+	/// <returns>Sem conteúdo se for bem-sucedido.</returns>
+	/// <response code="204">Exclusão bem-sucedida.</response>
+	/// <response code="404">Categoria não encontrada.</response>
+	/// <response code="422">Se a categoria estiver em uso por transações (Regra de Negócio).</response>
+	[HttpDelete("{id:guid}")]
+	[ProducesResponseType(StatusCodes.Status204NoContent)]
+	[ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+	[ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status422UnprocessableEntity)]
+	[SwaggerOperation(
+		Summary = "Excluir categoria",
+		Description = "Remove uma categoria do sistema. Falha se existirem transações vinculadas a esta categoria.")]
+	public async Task<IActionResult> Delete(
+		[FromServices] IDeleteCategoryByIdUseCase useCase,
+		[FromRoute] Guid id)
+	{
+		await useCase.ExecuteAsync(id);
+		return NoContent();
 	}
 }
