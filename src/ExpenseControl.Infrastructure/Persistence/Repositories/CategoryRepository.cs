@@ -2,12 +2,11 @@
 using ExpenseControl.Domain.Interfaces.Repositories;
 using ExpenseControl.Domain.Models;
 using ExpenseControl.Infrastructure.Extensions;
-using ExpenseControl.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
-namespace ExpenseControl.Infrastructure.Repositories;
+namespace ExpenseControl.Infrastructure.Persistence.Repositories;
 
-public class CategoryRepository(ExpenseControlDbContext context) : ICategoryRepository
+public sealed class CategoryRepository(ExpenseControlDbContext context) : ICategoryRepository
 {
 	public async Task AddAsync(Category category)
 	{
@@ -19,12 +18,22 @@ public class CategoryRepository(ExpenseControlDbContext context) : ICategoryRepo
 		return await context.Categories.FindAsync(id);
 	}
 
-	public async Task<PaginatedResult<Category>> GetAllAsync(int page, int pageSize)
+	public async Task<PaginatedResult<Category>> GetPaginatedAsync(int page, int pageSize)
 	{
 		return await context.Categories
 			.AsNoTracking()
-			.OrderBy(c => c.Description)
+			.OrderBy(c => c.Name)
 			.ToPaginatedResultAsync(page, pageSize);
+	}
+
+	public async Task<bool> HasTransactionsAsync(Guid categoryId)
+	{
+		return await context.Transactions.AnyAsync(t => t.CategoryId == categoryId);
+	}
+
+	public void Delete(Category category)
+	{
+		context.Categories.Remove(category);
 	}
 }
 

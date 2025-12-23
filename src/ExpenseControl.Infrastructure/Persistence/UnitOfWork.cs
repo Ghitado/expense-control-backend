@@ -1,7 +1,6 @@
 ﻿using ExpenseControl.Domain.Interfaces;
-using ExpenseControl.Infrastructure.Persistence;
 
-namespace ExpenseControl.Infrastructure.Repositories;
+namespace ExpenseControl.Infrastructure.Persistence;
 
 public class UnitOfWork(ExpenseControlDbContext context) : IUnitOfWork
 {

@@ -11,9 +11,7 @@ public class TransactionConfiguration : IEntityTypeConfiguration<Transaction>
 		builder.ToTable("Transactions");
 
 		builder.HasKey(t => t.Id);
-
-		builder.Property(p => p.Id)
-			.ValueGeneratedNever();
+		builder.Property(t => t.Id).ValueGeneratedNever();
 
 		builder.Property(t => t.Description)
 			.IsRequired()
@@ -23,17 +21,24 @@ public class TransactionConfiguration : IEntityTypeConfiguration<Transaction>
 			.IsRequired()
 			.HasPrecision(18, 2);
 
+		builder.Property(t => t.Date)
+			.IsRequired()
+			.HasColumnType("date");
+
+		builder.HasIndex(t => t.Date);
+
 		builder.Property(t => t.Type)
+			.IsRequired()
+			.HasConversion<string>()
+			.HasMaxLength(20);
+
+		builder.Property(t => t.CreatedAt)
 			.IsRequired();
 
 		builder.HasOne(t => t.Category)
 			.WithMany()
 			.HasForeignKey(t => t.CategoryId)
-			.OnDelete(DeleteBehavior.Restrict); 
-
-		builder.Property(t => t.CreatedAt)
-			.IsRequired()
-			.ValueGeneratedNever();
+			.OnDelete(DeleteBehavior.Restrict);
 	}
 }
 
