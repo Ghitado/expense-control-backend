@@ -1,18 +1,20 @@
 # Expense Control API
 
-API RESTful para controle de despesas residenciais desenvolvida com .NET 9. O objetivo deste projeto é demonstrar a implementação de uma arquitetura robusta, seguindo princípios de Domain-Driven Design (DDD) e Clean Architecture, além de práticas modernas de CI/CD.
+Este documento apresenta a Expense Control API, uma interface de programação de aplicações (API) RESTful desenvolvida com .NET 9, destinada ao controle de despesas residenciais. O objetivo primordial deste projeto consiste na demonstração prática da implementação de uma arquitetura de software robusta e escalável.
+
+O desenvolvimento fundamentou-se nos princípios do Domain-Driven Design (DDD) e da Clean Architecture, priorizando o desacoplamento entre componentes, a testabilidade e a aplicação de práticas modernas de DevOps.
 
 ## Tecnologias e Práticas
 
-- **Linguagem:** C# (.NET 9)
-- **ORM:** Entity Framework Core
-- **Banco de Dados:** PostgreSQL (Hospedado na Neon.tech)
-- **Testes:** xUnit
-- **Documentação:** Swagger / OpenAPI
-- **Hospedagem:** Azure App Service (Linux)
-- **CI/CD:** GitHub Actions
+- **Núcleo:** C# (.NET 9) e Entity Framework Core.
+- **Banco de Dados:** PostgreSQL.
+- **Garantia de Qualidade:** Testes unitários implementados com xUnit e validações de dados via FluentValidation.
+- **Documentação:** Swagger / OpenAPI (utilizando Swashbuckle) para a especificação detalhada dos endpoints.
+- **Hospedagem:** Azure App Service (ambiente Linux).
+- **CI/CD:** GitHub Actions para automação dos processos de integração e entrega.
+- **Monitoramento:** Integração de Health Checks para verificação de integridade do sistema.
 
-## Estrutura e Arquitetura
+## Arquitetura e Organização do Projeto
 
 O projeto foi estruturado utilizando Clean Architecture para garantir o desacoplamento das camadas e facilitar a testabilidade:
 
@@ -34,12 +36,20 @@ Para contornar as limitações de inatividade do plano gratuito da Azure, foi impl
 ## Como Executar Localmente
 
 1. Clone o repositório.
+```
+git clone [https://github.com/Ghitado/expense-control-backend.git](https://github.com/Ghitado/expense-control-backend.git)
+```
 2. Configure a string de conexão com o PostgreSQL no arquivo `appsettings.Development.json`.
+```
+"ConnectionStrings": {
+  "DefaultConnection": "Host=localhost;Database=ExpenseControl;Username=postgres;Password=sua_senha"
+}
+```
 3. Execute o comando `dotnet restore` para baixar as dependências.
 4. Execute o projeto API via Visual Studio ou `dotnet run`.
 5. Acesse a documentação via `/swagger`.
 
 ## Melhorias Futuras
 
-- [ ] Implementar processamento assíncrono de relatórios usando **MassTransit** e **RabbitMQ** (CloudAMQP).
-- [ ] Adicionar autenticação/autorização (Identity ou JWT customizado).
+- [ ] Implementar processamento assíncrono de relatórios usando MassTransit e RabbitMQ (CloudAMQP).
+- [ ] Implementação de Rate Limiting para proteção da API contra uso abusivo.
